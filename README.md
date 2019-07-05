@@ -1,7 +1,7 @@
 # plot_openstreetmap
 MATLAB function for plotting maps from OpenStreetMap and OpenSeaMap on the background of a figure.
 
-# Example
+## Example
 
 Plotting several points on a map in Gothenburg archipelago and adding base map from OpenStreetMap (water and land) and overlaying with sea markings from OpenSeaMap.
 
@@ -24,7 +24,7 @@ export_fig('example-map.png', '-m2', '-a4', '-transparent')
 ![Map](example-map.png "Example map")
 
 
-# Acknowledgements
+## Acknowledgements
 
 This software was inspired by, and uses code from, the following open-source projects:
 * [plot_google_map](https://github.com/zoharby/plot_google_map) by Zohar Bar-Yehuda
