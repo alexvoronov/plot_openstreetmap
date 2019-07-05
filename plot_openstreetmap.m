@@ -17,9 +17,10 @@ function hgrp = plot_openstreetmap(varargin)
 %
 %    x = [11.6639 11.7078 11.7754 11.8063 11.8797];
 %    y = [57.6078 57.6473 57.6607 57.6804 57.6886];
-%    figure; plot(x, y, 'o-', 'LineWidth', 2);
+%    figure('Color', 'w'); plot(x, y, 'o-', 'LineWidth', 2);
 %    hBase = plot_openstreetmap('Alpha', 0.4, 'Scale', 2)
 %    hSea  = plot_openstreetmap('Alpha', 0.5, 'Scale', 2, 'BaseUrl', "http://tiles.openseamap.org/seamark")
+%    title('Map data from OpenStreetMap and OpenSeaMap');
 %
 
 p = inputParser;
