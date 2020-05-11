@@ -4,14 +4,18 @@ function hgrp = plot_openstreetmap(varargin)
 %
 %    Properties:
 %
-%      'Alpha'   Transparency level of the map (0 is fully transparent, 1 
-%                is opaque). Default: 1.
-%    'BaseUrl'   URL for the tiles (Default:
-%                'http://a.tile.openstreetmap.org'). More tile URLs: 
-%                https://wiki.openstreetmap.org/wiki/Tiles#Servers
-%      'Scale'   Resolution scale factor (Default: 1). Using Scale=2 will
-%                double the resulotion of the map image and will result in
-%                finer rendering.
+%         'Alpha'   Transparency level of the map (0 is fully transparent, 1 
+%                   is opaque). Default: 1.
+%       'BaseUrl'   URL for the tiles (Default:
+%                   'http://a.tile.openstreetmap.org'). More tile URLs: 
+%                   https://wiki.openstreetmap.org/wiki/Tiles#Servers
+%         'Scale'   Resolution scale factor (Default: 1). Using Scale=2 will
+%                   double the resulotion of the map image and will result in
+%                   finer rendering.
+%  'MaxZoomLevel'   Maximum tile zoom level (Default: 16). This sets the
+%                   maximum zoom level that will be requested from the tile 
+%                   server. Note that not all tile servers will support 
+%                   high zoom levels.
 %
 % EXAMPLE
 %
@@ -26,9 +30,11 @@ function hgrp = plot_openstreetmap(varargin)
 p = inputParser;
 validScalar0to1 = @(x) isnumeric(x) && isscalar(x) && (x >= 0) && (x <=1);
 validScalarPos  = @(x) isnumeric(x) && isscalar(x);
+validMaxZoomLevel  = @(x) isnumeric(x) && isscalar(x) && (x >= 0);
 addParameter(p, 'BaseUrl','http://a.tile.openstreetmap.org', @isstring);
 addParameter(p, 'Alpha', 1, validScalar0to1);
 addParameter(p, 'Scale', 1, validScalarPos);
+addParameter(p, 'MaxZoomLevel', 16, validMaxZoomLevel);
 parse(p,varargin{:});
 
 ax = gca();
@@ -37,6 +43,7 @@ verbose = false;
 baseurl = p.Results.BaseUrl;
 alpha = p.Results.Alpha;
 scale = p.Results.Scale;
+maxZoomLevel = p.Results.MaxZoomLevel;
 
 %% Convertion from lat lon to tile x and y, and back.
 % See: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -60,7 +67,7 @@ ax.PlotBoxAspectRatioMode = 'manual';
 [width, height] = ax_width_pixels(ax);
 width = width * scale;
 height = height * scale;
-zoomlevel = get_zoomlevel(curAxis, width, height);
+zoomlevel = get_zoomlevel(curAxis, width, height, maxZoomLevel);
 
 %% Memoize downloaded tiles, to save bandwidth.
 memoizedImread = memoize(@imread);
@@ -177,7 +184,7 @@ set(hgrp,'tag','osm_map')
         drawnow
     end
 
-    function zoomlevel = get_zoomlevel(curAxis, width, height)
+    function zoomlevel = get_zoomlevel(curAxis, width, height, maxZoomLevel)
         [xExtent,yExtent] = latLonToMeters(curAxis(3:4), curAxis(1:2) );
         minResX = diff(xExtent) / width;
         minResY = diff(yExtent) / height;
@@ -186,8 +193,8 @@ set(hgrp,'tag','osm_map')
         initialResolution = 2 * pi * 6378137 / tileSize; % 156543.03392804062 for tileSize 256 pixels
         zoomlevel = floor(log2(initialResolution/minRes));
 
-        % Enforce valid zoom levels: 1 <= zoom <= 12
-        zoomlevel = min(max(zoomlevel, 1), 16);
+        % Enforce valid zoom levels: 1 <= zoom <= maxZoomLevel (Default: 16)
+        zoomlevel = min(max(zoomlevel, 1), maxZoomLevel);
     end
 
     function [x,y] = latLonToMeters(lat, lon )
